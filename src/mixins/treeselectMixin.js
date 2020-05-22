@@ -719,7 +719,13 @@ export default {
       } else if (this.valueConsistsOf === BRANCH_PRIORITY) {
         internalValue = this.forest.selectedNodeIds.filter(id => {
           const node = this.getNode(id)
-          if (node.isRootNode) return true
+          if (node.isRootNode ) {
+            if(node.hasDisabledDescendants){
+              return false;
+            } else{
+              return true;
+            }
+          }
           return !this.isSelected(node.parentNode)
         })
       } else if (this.valueConsistsOf === LEAF_PRIORITY) {
@@ -1605,8 +1611,16 @@ export default {
           if (!isRootNode) {
             parentNode.count[ALL_CHILDREN] += 1
             if (isLeaf) parentNode.count[LEAF_CHILDREN] += 1
-            if (isDisabled) parentNode.hasDisabledDescendants = true
+            if (isDisabled) {
+              parentNode.hasDisabledDescendants = true
+              var ancestorsTmp =  parentNode;
+              while(ancestorsTmp.parentNode){
+                ancestorsTmp.parentNode.hasDisabledDescendants = true;
+                ancestorsTmp = ancestorsTmp.parentNode;
+              }
+            }
           }
+
 
           // Preserve previous states.
           if (prevNodeMap && prevNodeMap[id]) {
@@ -1820,7 +1834,6 @@ export default {
 
       if (this.flat) {
         this.addValue(node)
-
         if (this.autoSelectAncestors) {
           node.ancestors.forEach(ancestor => {
             if (!this.isSelected(ancestor) && !ancestor.isDisabled) this.addValue(ancestor)
@@ -1833,7 +1846,6 @@ export default {
 
         return
       }
-
       const isFullyChecked = (
         node.isLeaf ||
         (/* node.isBranch && */!node.hasDisabledDescendants) ||
@@ -1842,15 +1854,17 @@ export default {
       if (isFullyChecked) {
         this.addValue(node)
       }
-
       if (node.isBranch) {
         this.traverseDescendantsBFS(node, descendant => {
           if (!descendant.isDisabled || this.allowSelectingDisabledDescendants) {
-            this.addValue(descendant)
+            if(!this.allowSelectingDisabledDescendants && descendant.hasDisabledDescendants){
+               //NOP
+            }else{
+              this.addValue(descendant)
+            }
           }
         })
       }
-
       if (isFullyChecked) {
         let curr = node
         while ((curr = curr.parentNode) !== NO_PARENT_NODE) {
