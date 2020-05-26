@@ -720,11 +720,7 @@ export default {
         internalValue = this.forest.selectedNodeIds.filter(id => {
           const node = this.getNode(id)
           if (node.isRootNode ) {
-            if(node.hasDisabledDescendants){
-              return false;
-            } else{
-              return true;
-            }
+            return true;
           }
           return !this.isSelected(node.parentNode)
         })
@@ -1857,9 +1853,7 @@ export default {
       if (node.isBranch) {
         this.traverseDescendantsBFS(node, descendant => {
           if (!descendant.isDisabled || this.allowSelectingDisabledDescendants) {
-            if(!this.allowSelectingDisabledDescendants && descendant.hasDisabledDescendants){
-               //NOP
-            }else{
+            if(this.allowSelectingDisabledDescendants || !descendant.hasDisabledDescendants){
               this.addValue(descendant)
             }
           }
