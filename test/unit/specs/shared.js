@@ -109,6 +109,13 @@ export async function typeSearchText(wrapper, text) {
   expect(wrapper.vm.trigger.searchQuery).toBe(text)
 }
 
+export function typeSearchTextImmediately(wrapper, text) {
+  const $input = findInput(wrapper)
+  $input.element.value = text
+  $input.trigger('input')
+  expect(wrapper.vm.$refs.control.$refs['value-container'].$refs.input.value).toBe(text)
+}
+
 export function findInputContainer(wrapper) {
   return wrapper.find('.vue-treeselect__input-container')
 }

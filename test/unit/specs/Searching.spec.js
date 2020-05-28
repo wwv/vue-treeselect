@@ -1,6 +1,13 @@
 import { mount } from '@vue/test-utils'
 import sleep from 'yaku/lib/sleep'
-import { typeSearchText, findMenu, findVisibleOptions, findOptionByNodeId, findOptionArrowByNodeId } from './shared'
+import {
+  typeSearchText,
+  findMenu,
+  findVisibleOptions,
+  findOptionByNodeId,
+  findOptionArrowByNodeId,
+  typeSearchTextImmediately
+} from './shared'
 import Treeselect from '@src/components/Treeselect'
 import { INPUT_DEBOUNCE_DELAY } from '@src/constants'
 
@@ -468,25 +475,39 @@ describe('Searching', () => {
     await typeAndAssert('b', [ 'ab', 'b' ])
   })
 
-  it('sync search throttling delay', async () => {
-    const wrapper = mount(Treeselect, {
-      propsData: {
-        inputDebounceDelay: 500,
-        options: [ {
-          id: 'a',
-          label: 'a',
-          children: [ {
-            id: 'aa',
-            label: 'x',
-          }, {
-            id: 'ab',
-            label: 'a x',
-          } ],
-        } ],
-      },
-    })
+  describe('throttling', () => {
+    it('sync search throttling delay', async () => {
+      const DELAY = 1000,
+        wrapper = mount(Treeselect, {
+          propsData: {
+            inputDebounceDelay: DELAY,
+            options: [{
+              id: 'a',
+              label: 'a',
+              children: [{
+                id: 'aa',
+                label: 'cd',
+              }, {
+                id: 'ab',
+                label: 'a x',
+              }],
+            }],
+          },
+        })
 
-    await typeSearchText(wrapper, 'a x')
+      const { vm } = wrapper
+
+      vm.openMenu()
+      await vm.$nextTick()
+
+      typeSearchTextImmediately(wrapper, 'a x')
+      expect(vm.forest.nodeMap.ab.isMatched).toBe(true)
+
+      typeSearchTextImmediately(wrapper, 'cd')
+      expect(vm.forest.nodeMap.aa.isMatched).toBe(false)
+      await sleep(DELAY)
+      expect(vm.forest.nodeMap.aa.isMatched).toBe(true)
+    })
   })
 
   describe('async search', () => {
