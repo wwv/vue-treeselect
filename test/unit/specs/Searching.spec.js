@@ -508,6 +508,48 @@ describe('Searching', () => {
       await sleep(DELAY)
       expect(vm.forest.nodeMap.aa.isMatched).toBe(true)
     })
+
+    describe('search should start from minimum symbol count', async () => {
+      const COUNT = 3, DELAY = 10,
+        wrapper = mount(Treeselect, {
+          propsData: {
+            minSearchCount: COUNT,
+            inputDebounceDelay: DELAY,
+            options: [{
+              id: 'a',
+              label: 'aaaa',
+              children: [{
+                id: 'b',
+                label: 'bbbb',
+              }, {
+                id: 'c',
+                label: 'cccc',
+              }],
+            }],
+          },
+        })
+
+      const { vm } = wrapper
+
+      vm.openMenu()
+      await vm.$nextTick()
+
+      it ('should not search while count less than required', async () => {
+        await typeSearchTextImmediately(wrapper, 'aa')
+        expect(vm.forest.nodeMap.a.isMatched).toBe(false)
+      })
+      await sleep(DELAY)
+      it ('should be changed after count reached limit', async () => {
+        await typeSearchTextImmediately(wrapper, 'aaa')
+        expect(vm.forest.nodeMap.a.isMatched).toBe(true)
+      })
+      await sleep(DELAY)
+      it ('should not be changed while count less than required', async () => {
+        await typeSearchTextImmediately(wrapper, 'bb')
+        expect(vm.forest.nodeMap.a.isMatched).toBe(true)
+      })
+    })
+
   })
 
   describe('async search', () => {

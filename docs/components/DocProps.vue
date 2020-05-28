@@ -357,7 +357,12 @@
         type: 'Number',
         defaultValue: code('200'),
         description: `Sync search throttling delay. The represents the “waiting time” between input entries before processing the search.`,
-      } ],
+      }, {
+        name: 'minSearchCount',
+        type: 'Number',
+        defaultValue: code('0'),
+        description: `Minimum symbol count required to start search.`,
+      }],
     }),
   }
 </script>

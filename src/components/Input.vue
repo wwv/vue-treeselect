@@ -1,6 +1,7 @@
 <script>
-  import { debounce, deepExtend, includes } from '../utils'
+  import { deepExtend, includes } from '../utils'
   import { MIN_INPUT_WIDTH, KEY_CODES } from '../constants'
+  import { debounce } from 'lodash'
 
   const keysThatRequireMenuBeingOpen = [
     KEY_CODES.ENTER,
@@ -51,8 +52,11 @@
     },
 
     created() {
+      const { instance } = this
       this.debouncedCallback = debounce(
-        this.updateSearchQuery,
+        () => {
+          instance.trigger.searchQuery = this.value
+        },
         this.instance.inputDebounceDelay,
         { leading: true, trailing: true },
       )
@@ -103,12 +107,12 @@
         const { value } = evt.target
 
         this.value = value
-
         if (value) {
-          this.debouncedCallback()
+          if (value.length >= this.instance.minSearchCount) this.debouncedCallback()
+          else this.debouncedCallback.cancel()
         } else {
           this.debouncedCallback.cancel()
-          this.updateSearchQuery()
+          this.instance.trigger.searchQuery = ''
         }
       },
 
@@ -279,12 +283,6 @@
           MIN_INPUT_WIDTH,
           this.$refs.sizer.scrollWidth + 15,
         )
-      },
-
-      updateSearchQuery() {
-        const { instance } = this
-
-        instance.trigger.searchQuery = this.value
       },
     },
 

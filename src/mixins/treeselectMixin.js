@@ -644,6 +644,14 @@ export default {
       type: Number,
       default: INPUT_DEBOUNCE_DELAY,
     },
+
+    /**
+     * Sync search minimum count.
+     */
+    minSearchCount: {
+      type: Number,
+      default: 0,
+    },
   },
 
   data() {
