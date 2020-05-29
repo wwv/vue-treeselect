@@ -691,6 +691,9 @@ export default {
       // States of root options.
       rootOptionsStates: createAsyncOptionsStates(),
 
+      // Is there any symbols in input field
+      hasInput: false,
+
       localSearch: {
         // Has user entered any query to search local options?
         active: false,

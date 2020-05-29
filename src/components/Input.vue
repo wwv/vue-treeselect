@@ -105,14 +105,16 @@
 
       onInput(evt) {
         const { value } = evt.target
+        const { instance }  = this
 
         this.value = value
+        instance.hasInput = !!value
         if (value) {
           if (value.length >= this.instance.minSearchCount) this.debouncedCallback()
           else this.debouncedCallback.cancel()
         } else {
           this.debouncedCallback.cancel()
-          this.instance.trigger.searchQuery = ''
+          instance.trigger.searchQuery = ''
         }
       },
 
